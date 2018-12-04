@@ -82,7 +82,7 @@
 		"grunt-obfuscator": "^0.1.0",
 		"js-nacl": "^0.6.0",
 		"jsdox": "~0.4.9",
-		"lodash": "^3.9.3",
+		"lodash": "^3.10.1",
 		"mocha": "^2.2.5",
 		"moment": "^2.9.0",
 		"nodeload": "^0.4.0",
