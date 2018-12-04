@@ -776,7 +776,7 @@ function DApp() {
 }
 
 //constructor
-function DApps(cb, scope) {
+function DApps(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

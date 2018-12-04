@@ -326,7 +326,7 @@ function Username() {
 }
 
 //constructor
-function Accounts(cb, scope) {
+function Accounts(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

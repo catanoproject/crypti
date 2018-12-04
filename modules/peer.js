@@ -14,7 +14,7 @@ require('array.prototype.find'); //old node fix
 var modules, library, self, private = {}, shared = {};
 
 //constructor
-function Peer(cb, scope) {
+function Peer(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

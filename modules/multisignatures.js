@@ -287,7 +287,7 @@ function Multisignature() {
 }
 
 //constructor
-function Multisignatures(cb, scope) {
+function Multisignatures(scope, cb) {
 	library = scope;
 	genesisblock = library.genesisblock;
 	self = this;

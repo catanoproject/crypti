@@ -7,7 +7,7 @@ var modules, library, self, private = {}, shared = {};
 private.version, private.osName, private.port, private.sharePort;
 
 //constructor
-function System(cb, scope) {
+function System(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

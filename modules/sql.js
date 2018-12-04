@@ -14,7 +14,7 @@ private.SINGLE_QUOTES = /'/g;
 private.SINGLE_QUOTES_DOUBLED = "''";
 
 //constructor
-function Sql(cb, scope) {
+function Sql(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

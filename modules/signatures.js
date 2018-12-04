@@ -160,7 +160,7 @@ function Signature() {
 }
 
 //constructor
-function Signatures(cb, scope) {
+function Signatures(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

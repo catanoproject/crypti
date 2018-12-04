@@ -119,7 +119,7 @@ function Transfer() {
 }
 
 //constructor
-function Transactions(cb, scope) {
+function Transactions(scope, cb) {
 	library = scope;
 	genesisblock = library.genesisblock;
 	self = this;

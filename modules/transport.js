@@ -19,7 +19,7 @@ private.loaded = false;
 private.messages = {};
 
 //constructor
-function Transport(cb, scope) {
+function Transport(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

@@ -270,7 +270,7 @@ function Delegate() {
 }
 
 //constructor
-function Delegates(cb, scope) {
+function Delegates(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

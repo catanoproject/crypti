@@ -158,7 +158,7 @@ shared.decryptbox = function (req, cb) {
 */
 
 //constructor
-function Crypto(cb, scope) {
+function Crypto(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

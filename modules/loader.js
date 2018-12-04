@@ -18,7 +18,7 @@ private.blocksToSync = 0;
 private.syncIntervalId = null;
 
 //constructor
-function Loader(cb, scope) {
+function Loader(scope, cb) {
 	library = scope;
 	private.genesisBlock = private.loadingLastBlock = library.genesisblock;
 	self = this;

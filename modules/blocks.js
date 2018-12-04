@@ -37,7 +37,7 @@ private.blocksDataFields = {
 // @formatter:on
 
 //constructor
-function Blocks(cb, scope) {
+function Blocks(scope, cb) {
 	library = scope;
 	genesisblock = library.genesisblock;
 	self = this;

@@ -157,7 +157,7 @@ function Contact() {
 }
 
 //constructor
-function Contacts(cb, scope) {
+function Contacts(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

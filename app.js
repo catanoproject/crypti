@@ -209,7 +209,7 @@ d.run(function () {
       cb(null, new z_schema())
     },
 
-    network: ['config', function (cb, scope) {
+    network: ['config', function (scope, cb) {
       var express = require('express');
       var app = express();
       var server = require('http').createServer(app);
@@ -237,7 +237,7 @@ d.run(function () {
       });
     }],
 
-    dbSequence: ["logger", function (cb, scope) {
+    dbSequence: ["logger", function (scope, cb) {
       var sequence = new Sequence({
         onWarning: function (current, limit) {
           scope.logger.warn("db queue", current)
@@ -246,7 +246,7 @@ d.run(function () {
       cb(null, sequence);
     }],
 
-    sequence: ["logger", function (cb, scope) {
+    sequence: ["logger", function (scope, cb) {
       var sequence = new Sequence({
         onWarning: function (current, limit) {
           scope.logger.warn("main queue", current)
@@ -255,7 +255,7 @@ d.run(function () {
       cb(null, sequence);
     }],
 
-    balancesSequence: ["logger", function (cb, scope) {
+    balancesSequence: ["logger", function (scope, cb) {
       var sequence = new Sequence({
         onWarning: function (current, limit) {
           scope.logger.warn("balance queue", current)
@@ -264,7 +264,7 @@ d.run(function () {
       cb(null, sequence);
     }],
 
-    connect: ['config', 'public', 'genesisblock', 'logger', 'build', 'network', function (cb, scope) {
+    connect: ['config', 'public', 'genesisblock', 'logger', 'build', 'network', function (scope, cb) {
       var path = require('path');
       var bodyParser = require('body-parser');
       var methodOverride = require('method-override');
@@ -373,7 +373,7 @@ d.run(function () {
       dbLite.connect(config.db, cb);
     },
 
-    logic: ['dbLite', 'bus', 'scheme', 'genesisblock', function (cb, scope) {
+    logic: ['dbLite', 'bus', 'scheme', 'genesisblock', function (scope, cb) {
       var Transaction = require('./logic/transaction.js');
       var Block = require('./logic/block.js');
       var Account = require('./logic/account.js');
@@ -393,19 +393,19 @@ d.run(function () {
             block: genesisblock
           });
         },
-        account: ["dbLite", "bus", "scheme", 'genesisblock', function (cb, scope) {
+        account: ["dbLite", "bus", "scheme", 'genesisblock', function (scope, cb) {
           new Account(scope, cb);
         }],
-        transaction: ["dbLite", "bus", "scheme", 'genesisblock', "account", function (cb, scope) {
+        transaction: ["dbLite", "bus", "scheme", 'genesisblock', "account", function (scope, cb) {
           new Transaction(scope, cb);
         }],
-        block: ["dbLite", "bus", "scheme", 'genesisblock', "account", "transaction", function (cb, scope) {
+        block: ["dbLite", "bus", "scheme", 'genesisblock', "account", "transaction", function (scope, cb) {
           new Block(scope, cb);
         }]
       }, cb);
     }],
 
-    modules: ['network', 'connect', 'config', 'logger', 'bus', 'sequence', 'dbSequence', 'balancesSequence', 'dbLite', 'logic', function (cb, scope) {
+    modules: ['network', 'connect', 'config', 'logger', 'bus', 'sequence', 'dbSequence', 'balancesSequence', 'dbLite', 'logic', function (scope, cb) {
       var tasks = {};
       Object.keys(config.modules).forEach(function (name) {
         tasks[name] = function (cb) {
@@ -418,7 +418,7 @@ d.run(function () {
           d.run(function () {
             logger.debug('loading module', name)
             var Klass = require(config.modules[name]);
-            var obj = new Klass(cb, scope)
+            var obj = new Klass(scope, cb)
             modules.push(obj);
           });
         }
@@ -428,7 +428,7 @@ d.run(function () {
       });
     }],
 
-    ready: ['modules', 'bus', function (cb, scope) {
+    ready: ['modules', 'bus', function (scope, cb) {
       scope.bus.message("bind", scope.modules);
       cb();
     }]

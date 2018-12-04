@@ -15,7 +15,7 @@ private.forgedBlocks = {};
 private.missedBlocks = {};
 
 //constructor
-function Round(cb, scope) {
+function Round(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;

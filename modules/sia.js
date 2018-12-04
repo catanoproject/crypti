@@ -8,7 +8,7 @@ var util = require('util'),
 var modules, library, self, private = {}, shared = {};
 
 //constructor
-function Sia(cb, scope) {
+function Sia(scope, cb) {
 	library = scope;
 	self = this;
 	self.__private = private;
