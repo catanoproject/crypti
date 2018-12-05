@@ -11,20 +11,20 @@ var async = require('async'),
 require('array.prototype.find'); //old node fix
 
 //private fields
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
 //constructor
 function Peer(scope, cb) {
 	library = scope;
 	self = this;
-	self.__private = private;
-	private.attachApi();
+	self.__private = __private;
+	__private.attachApi();
 
 	setImmediate(cb, null, self);
 }
 
 //private methods
-private.attachApi = function () {
+__private.attachApi = function () {
 	var router = new Router();
 
 	router.use(function (req, res, next) {
@@ -50,7 +50,7 @@ private.attachApi = function () {
 	});
 }
 
-private.updatePeerList = function (cb) {
+__private.updatePeerList = function (cb) {
 	modules.transport.getFromRandomPeer({
 		api: '/list',
 		method: 'GET'
@@ -129,7 +129,7 @@ private.updatePeerList = function (cb) {
 	});
 }
 
-private.count = function (cb) {
+__private.count = function (cb) {
 	library.dbLite.query("select count(*) from peers", {"count": Number}, function (err, rows) {
 		if (err) {
 			library.logger.error('Peer#count', err);
@@ -140,11 +140,11 @@ private.count = function (cb) {
 	})
 }
 
-private.banManager = function (cb) {
+__private.banManager = function (cb) {
 	library.dbLite.query("UPDATE peers SET state = 1, clock = null where (state = 0 and clock - $now < 0)", {now: Date.now()}, cb);
 }
 
-private.getByFilter = function (filter, cb) {
+__private.getByFilter = function (filter, cb) {
 	var sortFields = ["ip", "port", "state", "os", "sharePort", "version"];
 	var sortMethod = '', sortBy = ''
 	var limit = filter.limit || null;
@@ -358,9 +358,9 @@ Peer.prototype.onBlockchainReady = function () {
 			library.logger.error('onBlockchainReady', err);
 		}
 
-		private.count(function (err, count) {
+		__private.count(function (err, count) {
 			if (count) {
-				private.updatePeerList(function (err) {
+				__private.updatePeerList(function (err) {
 					err && library.logger.error('updatePeerList', err);
 					library.bus.message('peerReady');
 				})
@@ -374,14 +374,14 @@ Peer.prototype.onBlockchainReady = function () {
 
 Peer.prototype.onPeerReady = function () {
 	setImmediate(function nextUpdatePeerList() {
-		private.updatePeerList(function (err) {
+		__private.updatePeerList(function (err) {
 			err && library.logger.error('updatePeerList timer', err);
 			setTimeout(nextUpdatePeerList, 60 * 1000);
 		})
 	});
 
 	setImmediate(function nextBanManager() {
-		private.banManager(function (err) {
+		__private.banManager(function (err) {
 			err && library.logger.error('banManager timer', err);
 			setTimeout(nextBanManager, 65 * 1000)
 		});
@@ -437,7 +437,7 @@ shared.getPeers = function (req, cb) {
 			return cb(errorCode("PEERS.LIMIT", query));
 		}
 
-		private.getByFilter(query, function (err, peers) {
+		__private.getByFilter(query, function (err, peers) {
 			if (err) {
 				return cb(errorCode("PEERS.PEER_NOT_FOUND"));
 			}
@@ -478,7 +478,7 @@ shared.getPeer = function (req, cb) {
 			return cb(errorCode("PEERS.INVALID_PEER"));
 		}
 
-		private.getByFilter({
+		__private.getByFilter({
 			ip: ip_str,
 			port: port
 		}, function (err, peers) {

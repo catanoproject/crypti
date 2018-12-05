@@ -11,7 +11,7 @@ var ed = require('ed25519'),
 	sandboxHelper = require('../helpers/sandbox.js');
 
 // private fields
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
 function Signature() {
 	this.create = function (data, trs) {
@@ -163,8 +163,8 @@ function Signature() {
 function Signatures(scope, cb) {
 	library = scope;
 	self = this;
-	self.__private = private;
-	private.attachApi();
+	self.__private = __private;
+	__private.attachApi();
 
 	library.logic.transaction.attachAssetType(TransactionTypes.SIGNATURE, new Signature());
 
@@ -172,7 +172,7 @@ function Signatures(scope, cb) {
 }
 
 //private methods
-private.attachApi = function () {
+__private.attachApi = function () {
 	var router = new Router();
 
 	router.use(function (req, res, next) {

@@ -6,22 +6,22 @@ var util = require('util'),
 	sandboxHelper = require('../helpers/sandbox.js');
 
 //private fields
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
-private.loaded = false
+__private.loaded = false
 
 //constructor
 function Server(scope, cb) {
 	library = scope;
 	self = this;
-	self.__private = private;
-	private.attachApi();
+	self.__private = __private;
+	__private.attachApi();
 
 	setImmediate(cb, null, self);
 }
 
 //private methods
-private.attachApi = function() {
+__private.attachApi = function() {
 	var router = new Router();
 
 	router.use(function (req, res, next) {
@@ -30,7 +30,7 @@ private.attachApi = function() {
 	});
 
 	router.get('/', function (req, res) {
-		if (private.loaded) {
+		if (__private.loaded) {
 			res.render('wallet.html', {layout: false});
 		} else {
 			res.render('loading.html');
@@ -60,7 +60,7 @@ Server.prototype.onBind = function (scope) {
 }
 
 Server.prototype.onBlockchainReady = function () {
-	private.loaded = true;
+	__private.loaded = true;
 }
 
 //shared

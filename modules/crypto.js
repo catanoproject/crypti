@@ -6,9 +6,9 @@ var util = require('util'),
 	//encryptHelper = require('../helpers/encrypt.js'),
 	sandboxHelper = require('../helpers/sandbox.js');
 
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
-private.loaded = false;
+__private.loaded = false;
 /*
 shared.keypair = function (req, cb) {
 	var data = req.body;
@@ -161,7 +161,7 @@ shared.decryptbox = function (req, cb) {
 function Crypto(scope, cb) {
 	library = scope;
 	self = this;
-	self.__private = private;
+	self.__private = __private;
 
 	setImmediate(cb, null, self);
 }
@@ -177,7 +177,7 @@ Crypto.prototype.onBind = function (scope) {
 }
 
 Crypto.prototype.onBlockchainReady = function () {
-	private.loaded = true;
+	__private.loaded = true;
 }
 
 //shared

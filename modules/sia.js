@@ -5,13 +5,13 @@ var util = require('util'),
 	sandboxHelper = require('../helpers/sandbox.js'),
 	async = require('async');
 
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
 //constructor
 function Sia(scope, cb) {
 	library = scope;
 	self = this;
-	self.__private = private;
+	self.__private = __private;
 
 	setImmediate(cb, null, self);
 }

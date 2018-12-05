@@ -8,28 +8,28 @@ var async = require('async'),
 require('colors');
 
 //private fields
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
-private.loaded = false;
-private.loadingLastBlock = null;
-private.genesisBlock = null;
-private.total = 0;
-private.blocksToSync = 0;
-private.syncIntervalId = null;
+__private.loaded = false;
+__private.loadingLastBlock = null;
+__private.genesisBlock = null;
+__private.total = 0;
+__private.blocksToSync = 0;
+__private.syncIntervalId = null;
 
 //constructor
 function Loader(scope, cb) {
 	library = scope;
-	private.genesisBlock = private.loadingLastBlock = library.genesisblock;
+	__private.genesisBlock = __private.loadingLastBlock = library.genesisblock;
 	self = this;
-	self.__private = private;
-	private.attachApi();
+	self.__private = __private;
+	__private.attachApi();
 
 	setImmediate(cb, null, self);
 }
 
 //private methods
-private.attachApi = function () {
+__private.attachApi = function () {
 	var router = new Router();
 
 	router.map(shared, {
@@ -45,33 +45,33 @@ private.attachApi = function () {
 	});
 }
 
-private.syncTrigger = function (turnOn) {
-	if (turnOn === false && private.syncIntervalId) {
-		clearTimeout(private.syncIntervalId);
-		private.syncIntervalId = null;
+__private.syncTrigger = function (turnOn) {
+	if (turnOn === false && __private.syncIntervalId) {
+		clearTimeout(__private.syncIntervalId);
+		__private.syncIntervalId = null;
 	}
-	if (turnOn === true && !private.syncIntervalId) {
+	if (turnOn === true && !__private.syncIntervalId) {
 		setImmediate(function nextSyncTrigger() {
 			library.network.io.sockets.emit('loader/sync', {
-				blocks: private.blocksToSync,
+				blocks: __private.blocksToSync,
 				height: modules.blocks.getLastBlock().height
 			});
-			private.syncIntervalId = setTimeout(nextSyncTrigger, 1000);
+			__private.syncIntervalId = setTimeout(nextSyncTrigger, 1000);
 		});
 	}
 }
 
-private.loadFullDb = function (peer, cb) {
+__private.loadFullDb = function (peer, cb) {
 	var peerStr = peer ? ip.fromLong(peer.ip) + ":" + peer.port : 'unknown';
 
-	var commonBlockId = private.genesisBlock.block.id;
+	var commonBlockId = __private.genesisBlock.block.id;
 
 	library.logger.debug("Load blocks from genesis from " + peerStr);
 
 	modules.blocks.loadBlocksFromPeer(peer, commonBlockId, cb);
 }
 
-private.findUpdate = function (lastBlock, peer, cb) {
+__private.findUpdate = function (lastBlock, peer, cb) {
 	var peerStr = peer ? ip.fromLong(peer.ip) + ":" + peer.port : 'unknown';
 
 	library.logger.info("Looking for common block with " + peerStr);
@@ -198,7 +198,7 @@ private.findUpdate = function (lastBlock, peer, cb) {
 	});
 }
 
-private.loadBlocks = function (lastBlock, cb) {
+__private.loadBlocks = function (lastBlock, cb) {
 	modules.transport.getFromRandomPeer({
 		api: '/height',
 		method: 'GET'
@@ -229,12 +229,12 @@ private.loadBlocks = function (lastBlock, cb) {
 		}
 
 		if (bignum(modules.blocks.getLastBlock().height).lt(data.body.height)) { //diff in chainbases
-			private.blocksToSync = data.body.height;
+			__private.blocksToSync = data.body.height;
 
-			if (lastBlock.id != private.genesisBlock.block.id) { //have to found common block
-				private.findUpdate(lastBlock, data.peer, cb);
+			if (lastBlock.id != __private.genesisBlock.block.id) { //have to found common block
+				__private.findUpdate(lastBlock, data.peer, cb);
 			} else { //have to load full db
-				private.loadFullDb(data.peer, cb);
+				__private.loadFullDb(data.peer, cb);
 			}
 		} else {
 			cb();
@@ -242,7 +242,7 @@ private.loadBlocks = function (lastBlock, cb) {
 	});
 }
 
-private.loadSignatures = function (cb) {
+__private.loadSignatures = function (cb) {
 	modules.transport.getFromRandomPeer({
 		api: '/signatures',
 		method: 'GET',
@@ -282,7 +282,7 @@ private.loadSignatures = function (cb) {
 	});
 }
 
-private.loadUnconfirmedTransactions = function (cb) {
+__private.loadUnconfirmedTransactions = function (cb) {
 	modules.transport.getFromRandomPeer({
 		api: '/transactions',
 		method: 'GET'
@@ -326,13 +326,13 @@ private.loadUnconfirmedTransactions = function (cb) {
 	});
 }
 
-private.loadBlockChain = function () {
+__private.loadBlockChain = function () {
 	var offset = 0, limit = library.config.loading.loadPerIteration;
 	var verify = true; //library.config.loading.verifyOnLoading;
 
 	function load(count) {
 		verify = true;
-		private.total = count;
+		__private.total = count;
 
 		library.logic.account.removeTables(function (err) {
 			if (err) {
@@ -354,7 +354,7 @@ private.loadBlockChain = function () {
 										}
 
 										offset = offset + limit;
-										private.loadingLastBlock = lastBlockOffset;
+										__private.loadingLastBlock = lastBlockOffset;
 
 										cb();
 									});
@@ -453,7 +453,7 @@ private.loadBlockChain = function () {
 
 //public methods
 Loader.prototype.syncing = function () {
-	return !!private.syncIntervalId;
+	return !!__private.syncIntervalId;
 }
 
 Loader.prototype.sandboxApi = function (call, args, cb) {
@@ -464,20 +464,20 @@ Loader.prototype.sandboxApi = function (call, args, cb) {
 Loader.prototype.onPeerReady = function () {
 	setImmediate(function nextLoadBlock() {
 		library.sequence.add(function (cb) {
-			private.syncTrigger(true);
+			__private.syncTrigger(true);
 			var lastBlock = modules.blocks.getLastBlock();
-			private.loadBlocks(lastBlock, cb);
+			__private.loadBlocks(lastBlock, cb);
 		}, function (err) {
 			err && library.logger.error('loadBlocks timer', err);
-			private.syncTrigger(false);
-			private.blocksToSync = 0;
+			__private.syncTrigger(false);
+			__private.blocksToSync = 0;
 
 			setTimeout(nextLoadBlock, 9 * 1000)
 		});
 	});
 
 	setImmediate(function nextLoadUnconfirmedTransactions() {
-			private.loadUnconfirmedTransactions(function (err) {
+			__private.loadUnconfirmedTransactions(function (err) {
 				err && library.logger.error('loadUnconfirmedTransactions timer', err);
 				setTimeout(nextLoadUnconfirmedTransactions, 14 * 1000)
 			});
@@ -485,7 +485,7 @@ Loader.prototype.onPeerReady = function () {
 	});
 
 	setImmediate(function nextLoadSignatures() {
-		private.loadSignatures(function (err) {
+		__private.loadSignatures(function (err) {
 			err && library.logger.error('loadSignatures timer', err);
 
 			setTimeout(nextLoadSignatures, 14 * 1000)
@@ -496,26 +496,26 @@ Loader.prototype.onPeerReady = function () {
 Loader.prototype.onBind = function (scope) {
 	modules = scope;
 
-	private.loadBlockChain();
+	__private.loadBlockChain();
 }
 
 Loader.prototype.onBlockchainReady = function () {
-	private.loaded = true;
+	__private.loaded = true;
 }
 
 //shared
 shared.status = function (req, cb) {
 	cb(null, {
-		loaded: private.loaded,
-		now: private.loadingLastBlock.height,
-		blocksCount: private.total
+		loaded: __private.loaded,
+		now: __private.loadingLastBlock.height,
+		blocksCount: __private.total
 	});
 }
 
 shared.sync = function (req, cb) {
 	cb(null, {
 		sync: self.syncing(),
-		blocks: private.blocksToSync,
+		blocks: __private.blocksToSync,
 		height: modules.blocks.getLastBlock().height
 	});
 }

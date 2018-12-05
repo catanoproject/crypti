@@ -16,11 +16,11 @@ var crypto = require('crypto'),
 require('array.prototype.findindex'); //old node fix
 
 //private fields
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
-private.lastBlock = {};
+__private.lastBlock = {};
 // @formatter:off
-private.blocksDataFields = {
+__private.blocksDataFields = {
 	'b_id': String, 'b_version': String, 'b_timestamp': Number, 'b_height': Number, 'b_previousBlock': String, 'b_numberOfTransactions': String, 'b_totalAmount': String, 'b_totalFee': String, 'b_payloadLength': String, 'b_payloadHash': String, 'b_generatorPublicKey': String, 'b_blockSignature': String,
 	't_id': String, 't_type': Number, 't_timestamp': Number, 't_senderPublicKey': String, 't_senderId': String, 't_recipientId': String, 't_senderUsername': String, 't_recipientUsername': String, 't_amount': String, 't_fee': String, 't_signature': String, 't_signSignature': String,
 	's_publicKey': String,
@@ -41,16 +41,16 @@ function Blocks(scope, cb) {
 	library = scope;
 	genesisblock = library.genesisblock;
 	self = this;
-	self.__private = private;
-	private.attachApi();
+	self.__private = __private;
+	__private.attachApi();
 
-	private.saveGenesisBlock(function (err) {
+	__private.saveGenesisBlock(function (err) {
 		setImmediate(cb, err, self);
 	});
 }
 
 //private methods
-private.attachApi = function () {
+__private.attachApi = function () {
 	var router = new Router();
 
 	router.use(function (req, res, next) {
@@ -77,7 +77,7 @@ private.attachApi = function () {
 	});
 }
 
-private.saveGenesisBlock = function (cb) {
+__private.saveGenesisBlock = function (cb) {
 	library.dbLite.query("SELECT id FROM blocks WHERE id=$id", {id: genesisblock.block.id}, ['id'], function (err, rows) {
 		if (err) {
 			return cb(err)
@@ -85,7 +85,7 @@ private.saveGenesisBlock = function (cb) {
 		var blockId = rows.length && rows[0].id;
 
 		if (!blockId) {
-			private.saveBlock(genesisblock.block, function (err) {
+			__private.saveBlock(genesisblock.block, function (err) {
 				if (err) {
 					library.logger.error('saveBlock', err);
 				}
@@ -98,13 +98,13 @@ private.saveGenesisBlock = function (cb) {
 	});
 }
 
-private.deleteBlock = function (blockId, cb) {
+__private.deleteBlock = function (blockId, cb) {
 	library.dbLite.query("DELETE FROM blocks WHERE id = $id", {id: blockId}, function (err, res) {
 		cb(err, res);
 	});
 }
 
-private.list = function (filter, cb) {
+__private.list = function (filter, cb) {
 	var sortFields = ['b.id', 'b.timestamp', 'b.height', 'b.previousBlock', 'b.totalAmount', 'b.totalFee', 'b.numberOfTransactions', 'b.generatorPublicKey'];
 	var params = {}, fields = [], sortMethod = '', sortBy = '';
 	if (filter.generatorPublicKey) {
@@ -203,7 +203,7 @@ private.list = function (filter, cb) {
 	});
 }
 
-private.getById = function (id, cb) {
+__private.getById = function (id, cb) {
 	library.dbLite.query("select b.id, b.version, b.timestamp, b.height, b.previousBlock, b.numberOfTransactions, b.totalAmount, b.totalFee, b.payloadLength,  lower(hex(b.payloadHash)), lower(hex(b.generatorPublicKey)), lower(hex(b.blockSignature)), (select max(height) + 1 from blocks) - b.height " +
 		"from blocks b " +
 		"where b.id = $id", {id: id}, ['b_id', 'b_version', 'b_timestamp', 'b_height', 'b_previousBlock', 'b_numberOfTransactions', 'b_totalAmount', 'b_totalFee', 'b_payloadLength', 'b_payloadHash', 'b_generatorPublicKey', 'b_blockSignature', 'b_confirmations'], function (err, rows) {
@@ -216,7 +216,7 @@ private.getById = function (id, cb) {
 	});
 }
 
-private.saveBlock = function (block, cb) {
+__private.saveBlock = function (block, cb) {
 	library.dbLite.query('BEGIN TRANSACTION;');
 
 	library.logic.block.dbSave(block, function (err) {
@@ -243,7 +243,7 @@ private.saveBlock = function (block, cb) {
 	});
 }
 
-private.popLastBlock = function (oldLastBlock, cb) {
+__private.popLastBlock = function (oldLastBlock, cb) {
 	library.balancesSequence.add(function (cb) {
 		self.loadBlocksPart({id: oldLastBlock.previousBlock}, function (err, previousBlock) {
 			if (err || !previousBlock.length) {
@@ -264,7 +264,7 @@ private.popLastBlock = function (oldLastBlock, cb) {
 				], cb);
 			}, function (err) {
 				modules.round.backwardTick(oldLastBlock, previousBlock, function () {
-					private.deleteBlock(oldLastBlock.id, function (err) {
+					__private.deleteBlock(oldLastBlock.id, function (err) {
 						if (err) {
 							return cb(err);
 						}
@@ -277,7 +277,7 @@ private.popLastBlock = function (oldLastBlock, cb) {
 	}, cb);
 }
 
-private.getIdSequence = function (height, cb) {
+__private.getIdSequence = function (height, cb) {
 	library.dbLite.query("SELECT s.height, group_concat(s.id) from ( " +
 		'SELECT id, max(height) as height ' +
 		'FROM blocks ' +
@@ -301,7 +301,7 @@ private.getIdSequence = function (height, cb) {
 	})
 }
 
-private.readDbRows = function (rows) {
+__private.readDbRows = function (rows) {
 	var blocks = {};
 	var order = [];
 	for (var i = 0, length = rows.length; i < length; i++) {
@@ -336,7 +336,7 @@ private.readDbRows = function (rows) {
 	return blocks;
 }
 
-private.applyTransaction = function (block, transaction, sender, cb) {
+__private.applyTransaction = function (block, transaction, sender, cb) {
 	modules.transactions.applyUnconfirmed(transaction, sender, function (err) {
 		if (err) {
 			return setImmediate(cb, {
@@ -371,7 +371,7 @@ Blocks.prototype.getCommonBlock = function (peer, height, cb) {
 		},
 		function (next) {
 			count++;
-			private.getIdSequence(lastBlockHeight, function (err, data) {
+			__private.getIdSequence(lastBlockHeight, function (err, data) {
 				if (err) {
 					return next(err)
 				}
@@ -443,7 +443,7 @@ Blocks.prototype.loadBlocksData = function (filter, options, cb) {
 	filter.lastId && (params['lastId'] = filter.lastId);
 	filter.id && !filter.lastId && (params['id'] = filter.id);
 
-	var fields = private.blocksDataFields;
+	var fields = __private.blocksDataFields;
 	var method;
 
 	if (options.plain) {
@@ -519,7 +519,7 @@ Blocks.prototype.loadBlocksPart = function (filter, cb) {
 		var blocks = [];
 
 		if (!err) {
-			blocks = private.readDbRows(rows);
+			blocks = __private.readDbRows(rows);
 		}
 
 		cb(err, blocks);
@@ -557,7 +557,7 @@ Blocks.prototype.loadBlocksOffset = function (limit, offset, verify, cb) {
 			"left outer join outtransfer ot on ot.transactionId=t.id " +
 			"where b.height >= $offset and b.height < $limit " +
 			"ORDER BY b.height, t.rowid" +
-			"", params, private.blocksDataFields, function (err, rows) {
+			"", params, __private.blocksDataFields, function (err, rows) {
 			// Some notes:
 			// If loading catch error, for example, invalid signature on block & transaction, need to stop loading and remove all blocks after last good block.
 			// We need to process all transactions of block
@@ -565,12 +565,12 @@ Blocks.prototype.loadBlocksOffset = function (limit, offset, verify, cb) {
 				return cb(err);
 			}
 
-			var blocks = private.readDbRows(rows);
+			var blocks = __private.readDbRows(rows);
 
 			async.eachSeries(blocks, function (block, cb) {
 				if (block.id != genesisblock.block.id) {
 					if (verify) {
-						if (block.previousBlock != private.lastBlock.id) {
+						if (block.previousBlock != __private.lastBlock.id) {
 							return cb({
 								message: "Can't verify previous block",
 								block: block
@@ -634,10 +634,10 @@ Blocks.prototype.loadBlocksOffset = function (limit, offset, verify, cb) {
 											block: block
 										});
 									}
-									private.applyTransaction(block, transaction, sender, cb);
+									__private.applyTransaction(block, transaction, sender, cb);
 								});
 							} else {
-								private.applyTransaction(block, transaction, sender, cb);
+								__private.applyTransaction(block, transaction, sender, cb);
 							}
 						});
 					} else {
@@ -660,20 +660,20 @@ Blocks.prototype.loadBlocksOffset = function (limit, offset, verify, cb) {
 							], cb);
 						}, cb);
 					} else {
-						private.lastBlock = block;
+						__private.lastBlock = block;
 
-						modules.round.tick(private.lastBlock, cb);
+						modules.round.tick(__private.lastBlock, cb);
 					}
 				});
 			}, function (err) {
-				cb(err, private.lastBlock);
+				cb(err, __private.lastBlock);
 			});
 		});
 	}, cb);
 }
 
 Blocks.prototype.getLastBlock = function () {
-	return private.lastBlock;
+	return __private.lastBlock;
 }
 
 Blocks.prototype.processBlock = function (block, broadcast, cb) {
@@ -683,7 +683,7 @@ Blocks.prototype.processBlock = function (block, broadcast, cb) {
 		} catch (e) {
 			return setImmediate(cb, e.toString());
 		}
-		block.height = private.lastBlock.height + 1;
+		block.height = __private.lastBlock.height + 1;
 
 		modules.transactions.undoUnconfirmedList(function (err, unconfirmedTransactions) {
 			if (err) {
@@ -720,7 +720,7 @@ Blocks.prototype.processBlock = function (block, broadcast, cb) {
 					return done("Can't verify signature: " + block.id);
 				}
 
-				if (block.previousBlock != private.lastBlock.id) {
+				if (block.previousBlock != __private.lastBlock.id) {
 					//fork same height and different previous block
 					modules.delegates.fork(block, 1);
 					return done("Can't verify previous block: " + block.id);
@@ -731,7 +731,7 @@ Blocks.prototype.processBlock = function (block, broadcast, cb) {
 				}
 
 				var blockSlotNumber = slots.getSlotNumber(block.timestamp);
-				var lastBlockSlotNumber = slots.getSlotNumber(private.lastBlock.timestamp);
+				var lastBlockSlotNumber = slots.getSlotNumber(__private.lastBlock.timestamp);
 
 				if (blockSlotNumber > slots.getSlotNumber() || blockSlotNumber <= lastBlockSlotNumber) {
 					return done("Can't verify block timestamp: " + block.id);
@@ -872,7 +872,7 @@ Blocks.prototype.processBlock = function (block, broadcast, cb) {
 								});
 							});
 						}, function (err) {
-							private.saveBlock(block, function (err) {
+							__private.saveBlock(block, function (err) {
 								if (err) {
 									library.logger.error("Can't save block...");
 									library.logger.error(err);
@@ -880,7 +880,7 @@ Blocks.prototype.processBlock = function (block, broadcast, cb) {
 								}
 
 								library.bus.message('newBlock', block, broadcast);
-								private.lastBlock = block;
+								__private.lastBlock = block;
 
 								modules.round.tick(block, done);
 								//setImmediate(done);
@@ -930,8 +930,8 @@ Blocks.prototype.loadBlocksFromPeer = function (peer, lastCommonBlockId, cb) {
 					return next("Error, can't parse blocks...");
 				}
 
-				blocks = blocks.map(library.dbLite.row2parsed, library.dbLite.parseFields(private.blocksDataFields));
-				blocks = private.readDbRows(blocks);
+				blocks = blocks.map(library.dbLite.row2parsed, library.dbLite.parseFields(__private.blocksDataFields));
+				blocks = __private.readDbRows(blocks);
 
 				if (blocks.length == 0) {
 					loaded = true;
@@ -973,12 +973,12 @@ Blocks.prototype.deleteBlocksBefore = function (block, cb) {
 
 	async.whilst(
 		function () {
-			return !(block.height >= private.lastBlock.height)
+			return !(block.height >= __private.lastBlock.height)
 		},
 		function (next) {
-			blocks.unshift(private.lastBlock);
-			private.popLastBlock(private.lastBlock, function (err, newLastBlock) {
-				private.lastBlock = newLastBlock;
+			blocks.unshift(__private.lastBlock);
+			__private.popLastBlock(__private.lastBlock, function (err, newLastBlock) {
+				__private.lastBlock = newLastBlock;
 				next(err);
 			});
 		},
@@ -1012,7 +1012,7 @@ Blocks.prototype.generateBlock = function (keypair, timestamp, cb) {
 			var block = library.logic.block.create({
 				keypair: keypair,
 				timestamp: timestamp,
-				previousBlock: private.lastBlock,
+				previousBlock: __private.lastBlock,
 				transactions: ready
 			});
 		} catch (e) {
@@ -1034,14 +1034,14 @@ Blocks.prototype.onReceiveBlock = function (block) {
 	}
 
 	library.sequence.add(function (cb) {
-		if (block.previousBlock == private.lastBlock.id && private.lastBlock.height + 1 == block.height) {
+		if (block.previousBlock == __private.lastBlock.id && __private.lastBlock.height + 1 == block.height) {
 			library.logger.log('recieved new block id:' + block.id + ' height:' + block.height + ' slot:' + slots.getSlotNumber(block.timestamp))
 			self.processBlock(block, true, cb);
-		} else if (block.previousBlock != private.lastBlock.id && private.lastBlock.height + 1 == block.height) {
+		} else if (block.previousBlock != __private.lastBlock.id && __private.lastBlock.height + 1 == block.height) {
 			//fork right height and different previous block
 			modules.delegates.fork(block, 1);
 			cb('fork');
-		} else if (block.previousBlock == private.lastBlock.previousBlock && block.height == private.lastBlock.height && block.id != private.lastBlock.id) {
+		} else if (block.previousBlock == __private.lastBlock.previousBlock && block.height == __private.lastBlock.height && block.id != __private.lastBlock.id) {
 			//fork same height and same previous block, but different block id
 			modules.delegates.fork(block, 5);
 			cb('fork');
@@ -1073,7 +1073,7 @@ shared.getBlock = function (req, cb) {
 		}
 
 		library.dbSequence.add(function (cb) {
-			private.getById(query.id, function (err, block) {
+			__private.getById(query.id, function (err, block) {
 				if (!block || err) {
 					return cb(errorCode("BLOCKS.BLOCK_NOT_FOUND"));
 				}
@@ -1127,7 +1127,7 @@ shared.getBlocks = function (req, cb) {
 		}
 
 		library.dbSequence.add(function (cb) {
-			private.list(query, function (err, data) {
+			__private.list(query, function (err, data) {
 				if (err) {
 					return cb("Sql error");
 				}
@@ -1139,7 +1139,7 @@ shared.getBlocks = function (req, cb) {
 
 shared.getHeight = function (req, cb) {
 	var query = req.body;
-	cb(null, {height: private.lastBlock.height});
+	cb(null, {height: __private.lastBlock.height});
 }
 
 shared.getFee = function (req, cb) {

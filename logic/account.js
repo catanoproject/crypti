@@ -4,7 +4,7 @@ jsonSql.setDialect("sqlite")
 var constants = require('../helpers/constants.js');
 var genesisBlock = null;
 
-var private = {};
+var __private = {};
 
 //constructor
 function Account(scope, cb) {

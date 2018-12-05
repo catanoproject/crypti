@@ -14,8 +14,8 @@ function Block(scope, cb) {
 }
 
 //private methods
-var private = {};
-private.getAddressByPublicKey = function (publicKey) {
+var __private = {};
+__private.getAddressByPublicKey = function (publicKey) {
 	var publicKeyHash = crypto.createHash('sha256').update(publicKey, 'hex').digest();
 	var temp = new Buffer(8);
 	for (var i = 0; i < 8; i++) {
@@ -295,7 +295,7 @@ Block.prototype.dbRead = function (raw) {
 			payloadLength: parseInt(raw.b_payloadLength),
 			payloadHash: raw.b_payloadHash,
 			generatorPublicKey: raw.b_generatorPublicKey,
-			generatorId: private.getAddressByPublicKey(raw.b_generatorPublicKey),
+			generatorId: __private.getAddressByPublicKey(raw.b_generatorPublicKey),
 			blockSignature: raw.b_blockSignature,
 			confirmations: raw.b_confirmations
 		}

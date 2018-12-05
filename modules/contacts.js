@@ -10,7 +10,7 @@ var TransactionTypes = require('../helpers/transaction-types.js'),
 	errorCode = require('../helpers/errorCodes.js').error,
 	sandboxHelper = require('../helpers/sandbox.js');
 
-var modules, library, self, private = {}, shared = {};
+var modules, library, self, __private = {}, shared = {};
 
 function Contact() {
 	this.create = function (data, trs) {
@@ -160,8 +160,8 @@ function Contact() {
 function Contacts(scope, cb) {
 	library = scope;
 	self = this;
-	self.__private = private;
-	private.attachApi();
+	self.__private = __private;
+	__private.attachApi();
 
 	library.logic.transaction.attachAssetType(TransactionTypes.FOLLOW, new Contact());
 
@@ -169,7 +169,7 @@ function Contacts(scope, cb) {
 }
 
 //private methods
-private.attachApi = function () {
+__private.attachApi = function () {
 	var router = new Router();
 
 	router.use(function (req, res, next) {
