@@ -1,0 +1,29 @@
+{
+	"tags": {
+		"allowUnknownTags": true,
+		"dictionaries": ["jsdoc"]
+	},
+	"source": {
+		"include": [
+			"./app.js",
+			"./helpers/",
+			"./logic/",
+			"./modules/"
+		],
+		"exclude": [
+      "./node_modules",
+      "./public",
+      "./test"
+    ]
+	},
+	"plugins": ["plugins/markdown"],
+	"opts": {
+		"readme": "readme.md",
+		"encoding": "utf8",
+		"destination": "./docs/jsdoc",
+		"recurse": true
+	},
+	"templates": {
+		"cleverLinks": false
+	}
+}

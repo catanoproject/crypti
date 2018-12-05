@@ -23,3 +23,4 @@ bfg.jar
 ssl/
 dapps/
 package-lock.json
+docs/jsdoc
